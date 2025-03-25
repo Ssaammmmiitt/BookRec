@@ -10,7 +10,7 @@ const generateToken = (u_Id) => {
 
 router.post("/register", async (req, res) => {
   try {
-    let { email, username, password, gender } = req.body;
+    let { email, username, password } = req.body;
     if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -18,9 +18,6 @@ router.post("/register", async (req, res) => {
       return res
         .status(400)
         .json({ message: "Password must be at least 8 characters" });
-    }
-    if (!gender) {
-      gender = "Male";
     }
     if (username.length < 3) {
       return res
@@ -41,16 +38,12 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Username already taken!" });
     }
 
-    const profilePic =
-      gender === "Male"
-        ? `https://avatar.iran.liara.run/public/boy?username=${username}`
-        : `https://avatar.iran.liara.run/public/girl?username=${username}`;
+    const profilePic = `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`;
 
     const user = new User({
       username,
       email,
       password,
-      gender,
       profilePic,
     });
 

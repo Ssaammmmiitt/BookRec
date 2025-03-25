@@ -24,6 +24,11 @@ export default function Signup() {
 
 
   const handleSignup = async () => {
+    if (!username || !email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
     const result = await register(username,email,password);
     if(!result.success){
       Alert.alert("Error",result.error);
@@ -60,7 +65,7 @@ export default function Signup() {
                   style={styles.input}
                   placeholder="Enter an username"
                   value={username}
-                  onChange={setUsername}
+                  onChangeText={setUsername}
                   placeholderTextColor={COLORS.placeholderText}
                   keyboardType="default"
                   autoCapitalize="none"
@@ -83,12 +88,12 @@ export default function Signup() {
                   style={styles.input}
                   placeholder="Enter an email"
                   value={email}
-                  onChange={setEmail}
+                  onChangeText={setEmail}
                   placeholderTextColor={COLORS.placeholderText}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   keyboardAppearance="default"
-                />
+                  />
               </View>
             </View>
 
@@ -107,7 +112,7 @@ export default function Signup() {
                   placeholder="*********"
                   placeholderTextColor={COLORS.placeholderText}
                   value={password}
-                  onChange={setPassword}
+                  onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity

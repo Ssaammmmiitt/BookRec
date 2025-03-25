@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { Link } from "expo-router";
 import React from "react";
@@ -14,18 +15,29 @@ import styles from "../../assets/styles/login.styles.js";
 import { useState } from "react";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuthStore } from "../../store/authStore";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, login } = useAuthStore();
 
-  const handleLogin = () => {};
+  const handleLogin = async () => {
+    const result = await login(email, password);
+    if (result.success) {
+      console.log("Login Success");
+    } else {
+      Alert.alert("Error", result.error);
+    }
+  };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS ==="ios" ? "padding":"height"}>
-      <View style={[{flex:1},styles.container]}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={[{ flex: 1 }, styles.container]}>
         <View style={styles.topIllustration}>
           <Image
             source={require("../../assets/images/ic2.png")}
