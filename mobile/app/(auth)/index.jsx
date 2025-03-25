@@ -24,9 +24,17 @@ export default function Login() {
   const { isLoading, login } = useAuthStore();
 
   const handleLogin = async () => {
+    console.log("Email:", email);
+    console.log("Password:", password);
+
+    if (!email || !password) {
+      Alert.alert("Error", "Email and password are required.");
+      return;
+    }
+
     const result = await login(email, password);
     if (result.success) {
-      console.log("Login Success");
+      Alert.alert("Login Success");
     } else {
       Alert.alert("Error", result.error);
     }
@@ -84,7 +92,7 @@ export default function Login() {
                   placeholder="Enter your password"
                   placeholderTextColor={COLORS.placeholderText}
                   value={password}
-                  onChange={setPassword}
+                  onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity
@@ -111,7 +119,7 @@ export default function Login() {
                 <Text style={styles.buttonText}>Login</Text>
               )}
             </TouchableOpacity>
-            {/* Forgot Password */}
+            {/* SignUp if no account */}
             <View style={styles.footer}>
               <Text style={styles.footerText}> Don't have an account ? </Text>
               <Link href="/signup" asChild>

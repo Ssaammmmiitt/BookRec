@@ -43,32 +43,39 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  login: async(email,password)=> {
-    set({isLoading:true});
+  login: async (email, password) => {
+    set({ isLoading: true });
     try {
       const response = await fetch("http://10.0.2.2:3002/api/auth/login", {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        body:JSON.stringify({
+        body: JSON.stringify({
           email,
-          password
+          password,
         }),
       });
 
       const data = await response.json();
+      console.log(
+        "User Data Before Storage:",
+        JSON.stringify(data.user, null, 2)
+      );
 
-      if(!response.ok) throw new Error(data.message || "Something went wrong");
+      if (!response.ok) throw new Error(data.message || "Something went wrong");
 
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      const safeUser = JSON.parse(JSON.stringify(data.user)); // Removes circular references
+      await AsyncStorage.setItem("user", JSON.stringify(safeUser));
       await AsyncStorage.setItem("token", data.token);
-      
-      return {success:true};
+
+      set({ user: safeUser, token: data.token, isLoading: false });
+
+      return { success: true };
     } catch (error) {
       console.log("Login failed", error);
-      set({isLoading:false});
-      return {success:false, error:error.message};
+      set({ isLoading: false });
+      return { success: false, error: error.message };
     }
   },
   checkAuth: async () => {
@@ -89,7 +96,6 @@ export const useAuthStore = create((set) => ({
       set({ user: null, token: null });
     } catch (error) {
       console.log("Logout failed", error);
-      
     }
   },
 }));
