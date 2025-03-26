@@ -18,6 +18,7 @@ import COLORS from "../../constants/colors";
 
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import { useAuthStore } from "../../store/authStore";
 
 export default function create() {
   const [title, setTitle] = useState("");
@@ -28,6 +29,7 @@ export default function create() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+  const { token } = useAuthStore();
 
   const pickImage = async () => {
     //code for picking image
@@ -49,13 +51,12 @@ export default function create() {
         const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: "images",
           allowsEditing: true,
-          aspect: [4, 3],
+          aspect: [1, 1],
           quality: 0.75,
           base64: true,
         });
 
         if (!result.cancelled) {
-          console.log("result is here : ", result);
           setImage(result.assets[0].uri);
         }
 
@@ -81,6 +82,54 @@ export default function create() {
 
   const handleSubmit = async () => {
     //code for submitting data
+
+    if (!title || !caption || !imageBase64 || !rating) {
+      Alert.alert("Error", "Please fill in all the fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      //get file extension from uri or default to jpg
+      const uriParts = image.split(".");
+      const fileType = uriParts[uriParts.length - 1];
+      const imageType = fileType
+        ? `image/${fileType.toLowerCase()}`
+        : "image/jpg";
+
+      const imageDataUrl = `data:${imageType};base64;${imageBase64}`;
+
+      const response = await fetch("http://10.0.2.2:3002/api/books", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          caption,
+          rating: rating.toString(),
+          image: imageDataUrl,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Something wrong creating post api");
+
+      Alert.alert("Success", "Book recommendation added successfully");
+      setTitle("");
+      setCaption("");
+      setImage(null);
+      setRating(3);
+      setImageBase64(null);
+      router.push("/");
+    } catch (error) {
+      console.error("Error in creating post", error);
+      Alert.alert("Error", "Something went wrong creating post");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderRatingPicker = () => {
