@@ -31,10 +31,56 @@ export default function create() {
   const router = useRouter();
   const { token } = useAuthStore();
 
+  // const pickImage = async () => {
+  //   //code for picking image
+  //   try {
+  //     //req permissions
+  //     if (Platform.OS !== "web") {
+  //       const { status } =
+  //         await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+  //       if (status !== "granted") {
+  //         Alert.alert(
+  //           "Sorry, we need camera roll permissions to make this work!"
+  //         );
+  //         return;
+  //       }
+
+  //       //launch image lib
+
+  //       const result = await ImagePicker.launchImageLibraryAsync({
+  //         mediaTypes: "images",
+  //         allowsEditing: true,
+  //         aspect: [1, 1],
+  //         quality: 0.75,
+  //         base64: true,
+  //       });
+
+  //       if (!result.cancelled) {
+  //         setImage(result.assets[0].uri);
+  //       }
+
+  //       //if base64 is needed
+  //       if (result.assets[0].base64) {
+  //         setImageBase64(result.assets[0].base64);
+  //       } else {
+  //         //convert to base64
+  //         const base64 = await FileSystem.readAsStringAsync(
+  //           result.assets[0].uri,
+  //           {
+  //             encoding: FileSystem.EncodingType.Base64,
+  //           }
+  //         );
+  //         setImageBase64(base64);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log("Error in image picker", error);
+  //     Alert.alert("Error in picking image");
+  //   }
+  // };
   const pickImage = async () => {
-    //code for picking image
     try {
-      //req permissions
       if (Platform.OS !== "web") {
         const { status } =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -46,8 +92,6 @@ export default function create() {
           return;
         }
 
-        //launch image lib
-
         const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: "images",
           allowsEditing: true,
@@ -56,22 +100,24 @@ export default function create() {
           base64: true,
         });
 
-        if (!result.cancelled) {
-          setImage(result.assets[0].uri);
+        if (result.cancelled) {
+          console.log("Image picker was cancelled");
+          return;
         }
 
-        //if base64 is needed
-        if (result.assets[0].base64) {
-          setImageBase64(result.assets[0].base64);
+        const selectedAsset = result.assets[0];
+        setImage(selectedAsset.uri);
+        console.log("Selected Image URI:", selectedAsset.uri);
+
+        if (selectedAsset.base64) {
+          setImageBase64(selectedAsset.base64);
+          console.log("Selected Image Base64:", selectedAsset.base64);
         } else {
-          //convert to base64
-          const base64 = await FileSystem.readAsStringAsync(
-            result.assets[0].uri,
-            {
-              encoding: FileSystem.EncodingType.Base64,
-            }
-          );
+          const base64 = await FileSystem.readAsStringAsync(selectedAsset.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
           setImageBase64(base64);
+          console.log("Converted Image Base64:", base64);
         }
       }
     } catch (error) {
@@ -97,8 +143,8 @@ export default function create() {
         ? `image/${fileType.toLowerCase()}`
         : "image/jpg";
 
-      const imageDataUrl = `data:${imageType};base64;${imageBase64}`;
-
+      const imageDataUrl = `data:${imageType};base64,${imageBase64}`;
+      console.log("Image Data URL:", imageDataUrl); // Add this line
       const response = await fetch("http://10.0.2.2:3002/api/books", {
         method: "POST",
         headers: {
