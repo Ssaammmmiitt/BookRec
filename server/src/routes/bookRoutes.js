@@ -53,7 +53,7 @@ router.get("/", protectRoute, async (req, res) => {
       books,
       currentPage: page,
       totalBooks,
-      totalPahges: Math.ceil(totalBooks / limit),
+      totalPages: Math.ceil(totalBooks / limit),
     });
   } catch (error) {
     console.log("Error getting books", error);
