@@ -1,4 +1,11 @@
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/authStore";
@@ -6,6 +13,7 @@ import styles from "../../assets/styles/home.styles";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import { formatCreatedAt } from "../../lib/utils";
+import Loader from "../../components/Loader";
 
 export default function Home() {
   const { token } = useAuthStore();
@@ -21,7 +29,7 @@ export default function Home() {
       else if (pageNum === 1) setLoading(true);
 
       const response = await fetch(
-        `http://10.0.2.2:3002/api/books?page=${pageNum}&limit=5`,
+        `http://10.0.2.2:3002/api/books?page=${pageNum}&limit=2`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -54,7 +62,14 @@ export default function Home() {
     }
   };
 
-  const handleLoadMore = async () => {};
+  const handleLoadMore = async () => {
+    if (hasMore && !loading && !refreshing) {
+      sleep(1000);
+      await fetchBooks(page + 1);
+    }
+  };
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   useEffect(() => {
     fetchBooks();
@@ -76,6 +91,8 @@ export default function Home() {
     return stars;
   };
 
+  if (loading) return <Loader size="large" />;
+
   const renderItem = ({ item }) => (
     <View style={styles.bookCard}>
       <View style={styles.bookHeader}>
@@ -88,6 +105,7 @@ export default function Home() {
           <Text style={styles.username}>{item.user.username}</Text>
         </View>
       </View>
+      {console.log(item.user.profilePic)}
 
       <View style={styles.bookImageContainer}>
         <Image
@@ -115,24 +133,48 @@ export default function Home() {
       <FlatList
         data={books}
         renderItem={renderItem}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => fetchBooks(1, true)}
+            colors={COLORS.primary}
+            tintColor={COLORS.primary}
+          />
+        }
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
-
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.1}
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.headerTitle}>BookRec</Text>
-            <Text style={styles.headerSubtitle}>Discover great reads from the community !</Text>
-            </View>
+            <Text style={styles.headerSubtitle}>
+              Discover great reads from the community !
+            </Text>
+          </View>
         }
-
+        ListFooterComponent={
+          hasMore && books.length > 0 ? (
+            <ActivityIndicator
+              style={styles.footerLoader}
+              size="small"
+              color={COLORS.primary}
+            />
+          ) : null
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="book-outline" size={60} color={COLORS.textSecondary} />
+            <Ionicons
+              name="book-outline"
+              size={60}
+              color={COLORS.textSecondary}
+            />
             <Text style={styles.emptyText}>No book Recommendations found</Text>
-            <Text style={styles.emptySubtext}>Be the first person to rec a book !</Text>
-            
-            </View>
+            <Text style={styles.emptySubtext}>
+              Be the first person to rec a book !
+            </Text>
+          </View>
         }
       />
     </View>
