@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  TouchableOpacity,
   FlatList,
   ActivityIndicator,
   RefreshControl,
@@ -14,6 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import { formatCreatedAt } from "../../lib/utils";
 import Loader from "../../components/Loader";
+import avatar from "animal-avatar-generator";
+import { SvgXml } from "react-native-svg";
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -98,11 +99,12 @@ export default function Home() {
     <View style={styles.bookCard}>
       <View style={styles.bookHeader}>
         <View style={styles.userInfo}>
-          <Image
+          {/* <Image
             source={{ uri: item.user.profilePic }}
             style={styles.avatar}
             contentFit="cover"
-          />
+          /> */}
+          <SvgXml xml={avatar(`${item.user.username}`,{size:40, backgroundColors:["#000000"]})} style={styles.avatar}/>
           <Text style={styles.username}>{item.user.username}</Text>
         </View>
       </View>
@@ -148,7 +150,7 @@ export default function Home() {
         onEndReachedThreshold={0.1}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>BookRec</Text>
+            <Text style={styles.headerTitle}>BookRec📚</Text>
             <Text style={styles.headerSubtitle}>
               Discover great reads from the community !
             </Text>

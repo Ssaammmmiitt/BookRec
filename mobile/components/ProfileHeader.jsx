@@ -5,7 +5,6 @@ import avatar from 'animal-avatar-generator'
 import {SvgXml} from "react-native-svg";
 import { useAuthStore } from "../store/authStore";
 import styles from "../assets/styles/profile.styles";
-import { Image } from "expo-image";
 
 export default function ProfileHeader() {
   const { user } = useAuthStore();
