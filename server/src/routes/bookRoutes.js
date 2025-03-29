@@ -77,23 +77,23 @@ router.get("/user", protectRoute, async (req, res)=>{
 router.delete("/:id", protectRoute, async (req, res) => {
   try {
     //find book
-    const book = await book.findById(req.params.id);
-    if (!book) return res.status(404).json({ message: "Book not found" });
+    const bookFound = await book.findById(req.params.id);
+    if (!bookFound) return res.status(404).json({ message: "Book not found" });
 
     //check if user is the owner of the book
-    if (book.user.toString() !== req.user._id.toString())
+    if (bookFound.user.toString() !== req.user._id.toString())
       return res.status(401).json({ message: "Unauthorized" });
 
     //delete image from cloudinary
-    if (book.image && book.image.includes("cloudinary")) {
+    if (bookFound.image && bookFound.image.includes("cloudinary")) {
       try {
-        const imagePublicId = book.image.split("/").pop().split(".")[0];
+        const imagePublicId = bookFound.image.split("/").pop().split(".")[0];
         await cloudinary.uploader.destroy(imagePublicId);
       } catch (deleteError) {
         console.log("Error deleting image", deleteError);
       }
     }
-    await book.deleteOne();
+    await bookFound.deleteOne();
 
     return res.status(200).json({ message: "Book deleted" });
   } catch (error) {
