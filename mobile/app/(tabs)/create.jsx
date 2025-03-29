@@ -107,17 +107,14 @@ export default function create() {
 
         const selectedAsset = result.assets[0];
         setImage(selectedAsset.uri);
-        console.log("Selected Image URI:", selectedAsset.uri);
 
         if (selectedAsset.base64) {
           setImageBase64(selectedAsset.base64);
-          console.log("Selected Image Base64:", selectedAsset.base64);
         } else {
           const base64 = await FileSystem.readAsStringAsync(selectedAsset.uri, {
             encoding: FileSystem.EncodingType.Base64,
           });
           setImageBase64(base64);
-          console.log("Converted Image Base64:", base64);
         }
       }
     } catch (error) {

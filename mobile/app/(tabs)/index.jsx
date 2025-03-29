@@ -107,7 +107,6 @@ export default function Home() {
           <Text style={styles.username}>{item.user.username}</Text>
         </View>
       </View>
-      {console.log(item.user.profilePic)}
 
       <View style={styles.bookImageContainer}>
         <Image

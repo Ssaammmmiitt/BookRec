@@ -24,8 +24,7 @@ export default function Login() {
   const { isLoading, login } = useAuthStore();
 
   const handleLogin = async () => {
-    console.log("Email:", email);
-    console.log("Password:", password);
+    // Validate email and password
 
     if (!email || !password) {
       Alert.alert("Error", "Email and password are required.");

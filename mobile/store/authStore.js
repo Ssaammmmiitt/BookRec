@@ -11,7 +11,6 @@ export const useAuthStore = create((set) => ({
 
     //"http://10.0.2.2:3002/api/auth/register"
     try {
-      console.log(username, email, password);
       const response = await fetch("http://10.0.2.2:3002/api/auth/register", {
         method: "POST",
         headers: {
