@@ -15,6 +15,8 @@ import COLORS from "../../constants/colors";
 import { formatCreatedAt } from "../../lib/utils";
 import Loader from "../../components/Loader";
 
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function Home() {
   const { token } = useAuthStore();
   const [books, setBooks] = useState([]);
@@ -38,8 +40,6 @@ export default function Home() {
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.message || "Something went wrong fetching books");
-
-      console.log("Books fetched successfully", data.books);
 
       //setBooks((prevBooks) => [...prevBooks, ...data.books]);
       const uniqueBooks =
@@ -71,7 +71,6 @@ export default function Home() {
     }
   };
 
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   useEffect(() => {
     fetchBooks();

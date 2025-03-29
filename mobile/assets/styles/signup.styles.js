@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "700",
-    fontFamily: "JetBrainsMono-Medium",
+    fontFamily: "gameBubble",
     color: COLORS.primary,
     marginBottom: 8,
   },

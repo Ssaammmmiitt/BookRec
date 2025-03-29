@@ -1,4 +1,12 @@
-import { View, Text, Alert, FlatList, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/authStore";
@@ -8,28 +16,38 @@ import LogoutButton from "../../components/LogoutButton";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import { Image } from "expo-image";
+import { sleep } from "./index";
+import Loader from "../../components/Loader";
 
 export default function profile() {
   const { token } = useAuthStore();
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [deleteBookId, setDeletedBookId] = useState(null);
   const router = useRouter();
-  
+
+  const handleRefresh = async() =>{
+    setRefreshing(true);
+    await sleep(600);
+    await fetchData();
+    setRefreshing(false);
+  }
+
   const fetchData = async () => {
     try {
       setIsLoading(true);
-  
+
       const response = await fetch(`http://10.0.2.2:3002/api/books/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       const data = await response.json();
       if (!response.ok)
         throw new Error(
           data.message || "Something went wrong fetching profile"
         );
-  
+
       setBooks(data);
     } catch (error) {
       console.error("Error fetching books", error);
@@ -38,7 +56,7 @@ export default function profile() {
       setIsLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -60,22 +78,26 @@ export default function profile() {
 
   const handleDeleteBook = async (bookId) => {
     try {
-      const response = await fetch(`http://10.0.2.2:3002/api/books/${bookId}`,{
-        method:"DELETE",
-        headers:{
+      setDeletedBookId(bookId);
+      const response = await fetch(`http://10.0.2.2:3002/api/books/${bookId}`, {
+        method: "DELETE",
+        headers: {
           Authorization: `Bearer ${token}`,
-        }
-      })
+        },
+      });
 
       const data = await response.json();
-      if(!response.ok) throw new Error(data.message || "Failed to delete recommendation");
+      if (!response.ok)
+        throw new Error(data.message || "Failed to delete recommendation");
 
-      setBooks(books.filter((book)=> book._id !== bookId));
-      Alert.alert("Success","Recommendation deleted successfully");
+      setBooks(books.filter((book) => book._id !== bookId));
+      Alert.alert("Success", "Recommendation deleted successfully");
     } catch (error) {
       Alert.alert("Error", error.message || "Failed to delete recommendation");
+    } finally {
+      setDeletedBookId(null);
     }
-  }
+  };
 
   const renderBookItems = ({ item }) => (
     <View style={styles.bookItem}>
@@ -99,7 +121,11 @@ export default function profile() {
           confirmDelete(item._id);
         }}
       >
-        <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
+        {deleteBookId === item._id ? (
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        ) : (
+          <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -120,6 +146,7 @@ export default function profile() {
     return stars;
   };
 
+  if(isLoading && !refreshing ) return <Loader/>
 
   return (
     <View style={styles.container}>
@@ -138,6 +165,14 @@ export default function profile() {
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.booksList}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons
