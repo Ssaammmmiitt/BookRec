@@ -57,8 +57,10 @@ export default function Home() {
     } catch (error) {
       console.error("Error fetching books", error);
     } finally {
-      if (refresh) setRefreshing(false);
-      else setLoading(false);
+      if (refresh) {
+        await sleep(800);
+        setRefreshing(false);
+      } else setLoading(false);
     }
   };
 
@@ -137,7 +139,7 @@ export default function Home() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => fetchBooks(1, true)}
-            colors={COLORS.primary}
+            colors={[COLORS.primary]}
             tintColor={COLORS.primary}
           />
         }
